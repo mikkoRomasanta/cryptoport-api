@@ -6,7 +6,9 @@ from src.token import token
 from src.database import db
 from flask_jwt_extended import JWTManager
 import datetime
+from dotenv import load_dotenv
 
+load_dotenv()
 
 def create_app():
     '''Setup app variables'''
@@ -14,10 +16,10 @@ def create_app():
 
     app.config.from_mapping(
         SECRET_KEY=os.environ.get("SECRET_KEY"),
-        SQLALCHEMY_DATABASE_URI=os.environ.get("SQLALCHEMY_DB_URI"),
+        SQLALCHEMY_DATABASE_URI=os.getenv("SQLALCHEMY_DB_URI"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         JWT_SECRET_KEY=os.environ.get("JWT_SECRET_KEY"),
-        JWT_ACCESS_TOKEN_EXPIRES=datetime.timedelta(seconds=1300),
+        JWT_ACCESS_TOKEN_EXPIRES=datetime.timedelta(seconds=3600),
     )
 
     db.app=app
@@ -29,3 +31,6 @@ def create_app():
     app.register_blueprint(token)
         
     return app
+
+if __name__ == '__main__':
+    create_app()

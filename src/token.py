@@ -14,7 +14,6 @@ def handle_token():
     
     if request.method == 'POST':
         symbol = request.get_json().get("symbol","")
-        price = request.get_json().get("price","")
         contract = request.get_json().get("contract","")
         chain = request.get_json().get("chain","")
         
@@ -34,23 +33,6 @@ def handle_token():
             return jsonify({
                 "error": "symbol already exists"
             }), HTTP_409_CONFLICT
-        
-        # Price validation
-        if not price:
-            return jsonify({
-                "error": "invalid price"
-            }), HTTP_400_BAD_REQUEST
-            
-        elif isinstance(price,int) is False:
-            if isinstance(price,float) is False:
-                return jsonify({
-                    "error": "invalid price"
-                }), HTTP_400_BAD_REQUEST
-            
-        elif price < 0:
-            return jsonify({
-                "error": "price cannot be negative"
-            }), HTTP_400_BAD_REQUEST
         
         # Contract validation
         if not contract or type(contract) is not str:
@@ -81,14 +63,13 @@ def handle_token():
     
         #Validation End
             
-        token = Token(symbol=symbol.lower(), price=price, contract=contract, chain=chain.lower(), user_id=current_user)
+        token = Token(symbol=symbol.lower(), contract=contract, chain=chain.lower(), user_id=current_user)
         db.session.add(token)
         db.session.commit()
         
         return jsonify({
             "id": token.id,
             "symbol": token.symbol,
-            "price": token.price,
             "contract": token.contract,
             "chain": token.chain,
             "user_id": token.user_id,
@@ -109,7 +90,6 @@ def handle_token():
             data.append({
                "id": token.id,
                 "symbol": token.symbol,
-                "price": token.price,
                 "contract": token.contract,
                 "chain": token.chain,
                 "user_id": token.user_id,
@@ -145,7 +125,6 @@ def get_token(symbol):
     return jsonify({
         "id": token.id,
         "symbol": token.symbol,
-        "price": token.price,
         "contract": token.contract,
         "chain": token.chain,
         "user_id": token.user_id,
@@ -185,7 +164,6 @@ def edit_token(symbol):
         return jsonify({"error": "Token not found"}), HTTP_404_NOT_FOUND
 
     new_symbol = request.get_json().get("symbol","")
-    new_price = request.get_json().get("price","")
     new_contract = request.get_json().get("contract","")
     new_chain = request.get_json().get("chain","")
     
@@ -211,24 +189,6 @@ def edit_token(symbol):
         
     else:
         token.symbol = new_symbol.lower()
-    
-    # Price validation
-    if not new_price:
-        pass
-        
-    elif isinstance(new_price,int) is False:
-        if isinstance(new_price,float) is False:
-            return jsonify({
-                "error": "invalid price"
-            }), HTTP_400_BAD_REQUEST
-        
-    elif new_price < 0:
-        return jsonify({
-            "error": "price cannot be negative"
-        }), HTTP_400_BAD_REQUEST
-        
-    else:
-        token.price = new_price
     
     # Contract validation
     if not new_contract:
@@ -276,7 +236,6 @@ def edit_token(symbol):
     return jsonify({
             "id": token.id,
             "symbol": token.symbol,
-            "price": token.price,
             "contract": token.contract,
             "chain": token.chain,
             "created_at": token.created_at,
@@ -300,7 +259,6 @@ def get_all_token():
         data.append({
             "id": token.id,
             "symbol": token.symbol,
-            "price": token.price,
             "contract": token.contract,
             "chain": token.chain,
             "user_id": token.user_id,

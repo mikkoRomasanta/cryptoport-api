@@ -24,8 +24,7 @@ class User(db.Model):
 class Token(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     symbol = db.Column(db.String(6), nullable=False)
-    price = db.Column(db.BigInteger, nullable=False)
-    contract = db.Column(db.String(99), nullable=False)
+    contract = db.Column(db.String(255), nullable=False)
     chain = db.Column(db.String(20), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     status = db.Column(db.Boolean, default=1)
