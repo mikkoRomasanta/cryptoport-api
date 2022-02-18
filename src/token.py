@@ -246,16 +246,12 @@ def edit_token(symbol):
 @token.get('/all')
 @jwt_required()
 def get_all_token():
-    '''Get tokens from all users.'''
-    # Pagination meta info
-    page = request.args.get("page", 1, type=int)
-    per_page = request.args.get("per_page", 5,type=int)
-    
-    tokens = Token.query.filter_by(status=1).paginate(page=page,per_page=per_page)
+    '''Get tokens from all users.'''  
+    tokens = Token.query.filter_by(status=1)
     
     data = []
     
-    for token in tokens.items:
+    for token in tokens:
         data.append({
             "id": token.id,
             "symbol": token.symbol,
@@ -267,14 +263,4 @@ def get_all_token():
             "updated_at": token.updated_at 
         })
             
-    meta = {
-        "page": tokens.page,
-        "pages": tokens.pages,
-        "total_count": tokens.total,
-        "prev_page": tokens.prev_num,
-        "next_page": tokens.next_num,
-        "has_next": tokens.has_next,
-        "has_prev": tokens.has_prev,
-    }
-        
-    return jsonify({"data":data, "meta":meta}), HTTP_200_OK
+    return jsonify({"data":data}), HTTP_200_OK
