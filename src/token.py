@@ -51,7 +51,8 @@ def handle_token():
             
         elif Token.query.filter_by(contract=contract,
                                    user_id=current_user,
-                                   status=1).first():
+                                   status=1,
+                                   ).filter(contract != '').first():
             return jsonify({
                 "error": "contract already exists"
             }), HTTP_409_CONFLICT
