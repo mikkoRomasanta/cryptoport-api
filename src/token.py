@@ -16,6 +16,8 @@ def handle_token():
         symbol = request.get_json().get("symbol","")
         contract = request.get_json().get("contract","")
         chain = request.get_json().get("chain","")
+        api_type = request.get_json().get("api_type")
+        api_id = request.get_json().get("api_id")
         
         # Validation Start
         # Symbol validation
@@ -29,13 +31,15 @@ def handle_token():
                 "error": "symbol too long"
             }), HTTP_400_BAD_REQUEST
         
-        elif Token.query.filter_by(symbol=symbol.lower(),user_id=current_user,status=1).first():
+        elif Token.query.filter_by(symbol=symbol.lower(),
+                                   user_id=current_user,
+                                   status=1).first():
             return jsonify({
                 "error": "symbol already exists"
             }), HTTP_409_CONFLICT
         
         # Contract validation
-        if not contract or type(contract) is not str:
+        if type(contract) is not str:
             return jsonify({
                 "error": "invalid contract"
             }), HTTP_400_BAD_REQUEST
@@ -45,7 +49,9 @@ def handle_token():
                 "error": "contract too long"
             }), HTTP_400_BAD_REQUEST
             
-        elif Token.query.filter_by(contract=contract,user_id=current_user,status=1).first():
+        elif Token.query.filter_by(contract=contract,
+                                   user_id=current_user,
+                                   status=1).first():
             return jsonify({
                 "error": "contract already exists"
             }), HTTP_409_CONFLICT
@@ -60,10 +66,37 @@ def handle_token():
             return jsonify({
                 "error": "chain too long"
             }), HTTP_400_BAD_REQUEST
+            
+        # API Type validation
+        if not api_type or type(api_type) is not str:
+            return jsonify({
+                "error": "invalid API type"
+            }), HTTP_400_BAD_REQUEST
+              
+        elif len(api_type) > 30:
+            return jsonify({
+                "error": "api_type too long"
+            }), HTTP_400_BAD_REQUEST
+            
+        # API ID validation
+        if type(api_id) is not str:
+            return jsonify({
+                "error": "invalid API type"
+            }), HTTP_400_BAD_REQUEST
+              
+        elif len(api_type) > 30:
+            return jsonify({
+                "error": "api id too long"
+            }), HTTP_400_BAD_REQUEST
     
         #Validation End
             
-        token = Token(symbol=symbol.lower(), contract=contract, chain=chain.lower(), user_id=current_user)
+        token = Token(symbol=symbol.lower(), 
+                      contract=contract, 
+                      chain=chain.lower(),
+                      api_type=api_type.lower(), 
+                      api_id=api_id.lower(), 
+                      user_id=current_user)
         db.session.add(token)
         db.session.commit()
         
@@ -72,6 +105,8 @@ def handle_token():
             "symbol": token.symbol,
             "contract": token.contract,
             "chain": token.chain,
+            "api_type": token.api_type,
+            "api_id": token.api_id,
             "user_id": token.user_id,
             "created_at": token.created_at,
             "updated_at": token.updated_at
@@ -82,7 +117,9 @@ def handle_token():
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 5,type=int)
         
-        tokens = Token.query.filter_by(user_id=current_user,status=1).paginate(page=page,per_page=per_page)
+        tokens = Token.query.filter_by(user_id=current_user,
+                                       status=1).paginate(page=page,
+                                                          per_page=per_page)
         
         data = []
         
@@ -92,6 +129,8 @@ def handle_token():
                 "symbol": token.symbol,
                 "contract": token.contract,
                 "chain": token.chain,
+                "api_type": token.api_type,
+                "api_id": token.api_id,
                 "user_id": token.user_id,
                 "status": token.status,
                 "created_at": token.created_at,
@@ -117,7 +156,9 @@ def get_token(symbol):
     '''Get a specific token.'''
     current_user = get_jwt_identity()
     
-    token = Token.query.filter_by(user_id=current_user,symbol=symbol.lower(),status=1).first()
+    token = Token.query.filter_by(user_id=current_user,
+                                  symbol=symbol.lower(),
+                                  status=1).first()
     
     if not token:
         return jsonify({"message": "Token not found"}), HTTP_404_NOT_FOUND
@@ -127,6 +168,8 @@ def get_token(symbol):
         "symbol": token.symbol,
         "contract": token.contract,
         "chain": token.chain,
+        "api_type": token.api_type,
+        "api_id": token.api_id,
         "user_id": token.user_id,
         "status": token.status,
         "created_at": token.created_at,
@@ -140,7 +183,9 @@ def delete_token(symbol):
     '''Delete a token. Change status to false.'''
     current_user = get_jwt_identity()
     
-    token = Token.query.filter_by(user_id=current_user,symbol=symbol.lower(),status=1).first()
+    token = Token.query.filter_by(user_id=current_user,
+                                  symbol=symbol.lower(),
+                                  status=1).first()
     
     if not token:
         return jsonify({"error": "Token not found"}), HTTP_404_NOT_FOUND
@@ -158,7 +203,9 @@ def edit_token(symbol):
     '''Edit a token.'''
     current_user = get_jwt_identity()
     
-    token = Token.query.filter_by(user_id=current_user,symbol=symbol.lower(),status=1).first()
+    token = Token.query.filter_by(user_id=current_user,
+                                  symbol=symbol.lower(),
+                                  status=1).first()
     
     if not token:
         return jsonify({"error": "Token not found"}), HTTP_404_NOT_FOUND
@@ -166,6 +213,8 @@ def edit_token(symbol):
     new_symbol = request.get_json().get("symbol","")
     new_contract = request.get_json().get("contract","")
     new_chain = request.get_json().get("chain","")
+    new_api_type = request.get_json().get("api_type","")
+    new_api_id = request.get_json().get("api_id","")
     
     # Validation Start
     # Symbol validation
@@ -182,7 +231,9 @@ def edit_token(symbol):
             "error": "symbol too long"
         }), HTTP_400_BAD_REQUEST
     
-    elif Token.query.filter_by(symbol=new_symbol.lower(),user_id=current_user,status=1).first():
+    elif Token.query.filter_by(symbol=new_symbol.lower(),
+                               user_id=current_user,
+                               status=1).first():
         return jsonify({
             "error": "symbol already exists"
         }), HTTP_409_CONFLICT
@@ -204,7 +255,9 @@ def edit_token(symbol):
             "error": "contract too long"
         }), HTTP_400_BAD_REQUEST
         
-    elif Token.query.filter_by(contract=new_contract,user_id=current_user,status=1).first():
+    elif Token.query.filter_by(contract=new_contract,
+                               user_id=current_user,
+                               status=1).first():
         return jsonify({
             "error": "contract already exists"
         }), HTTP_409_CONFLICT
@@ -227,7 +280,41 @@ def edit_token(symbol):
         }), HTTP_400_BAD_REQUEST
         
     else:
-        token.chain = new_chain
+        token.chain = new_chain.lower()
+        
+    # API type validation
+    if not new_api_type:
+        pass
+    
+    elif type(new_api_type) is not str:
+        return jsonify({
+            "error": "invalid api type"
+        }), HTTP_400_BAD_REQUEST
+            
+    elif len(new_api_type) > 30:
+        return jsonify({
+            "error": "api type too long"
+        }), HTTP_400_BAD_REQUEST
+        
+    else:
+        token.api_type = new_api_type.lower()
+        
+    # API ID validation
+    if not new_api_id:
+        pass
+    
+    elif type(new_api_id) is not str:
+        return jsonify({
+            "error": "invalid api id"
+        }), HTTP_400_BAD_REQUEST
+            
+    elif len(new_api_id) > 30:
+        return jsonify({
+            "error": "api id too long"
+        }), HTTP_400_BAD_REQUEST
+        
+    else:
+        token.api_id = new_api_id.lower()
 
     #Validation End
     
@@ -238,6 +325,8 @@ def edit_token(symbol):
             "symbol": token.symbol,
             "contract": token.contract,
             "chain": token.chain,
+            "api_type": token.api_type,
+            "api_id": token.api_id,
             "created_at": token.created_at,
             "updated_at": token.updated_at
         }),HTTP_200_OK
@@ -257,6 +346,8 @@ def get_all_token():
             "symbol": token.symbol,
             "contract": token.contract,
             "chain": token.chain,
+            "api_type": token.api_type,
+            "api_id": token.api_id,
             "user_id": token.user_id,
             "status": token.status,
             "created_at": token.created_at,
