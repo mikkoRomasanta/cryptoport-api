@@ -52,7 +52,7 @@ def handle_token():
         elif Token.query.filter_by(contract=contract,
                                    user_id=current_user,
                                    status=1,
-                                   ).filter(contract != '').first():
+                                   ).first():
             return jsonify({
                 "error": "contract already exists"
             }), HTTP_409_CONFLICT
@@ -89,6 +89,14 @@ def handle_token():
             return jsonify({
                 "error": "api id too long"
             }), HTTP_400_BAD_REQUEST
+            
+        elif Token.query.filter_by(api_id=api_id,
+                                   user_id=current_user,
+                                   status=1,
+                                   ).first():
+            return jsonify({
+                "error": "contract already exists"
+        }), HTTP_409_CONFLICT
     
         #Validation End
             
@@ -313,6 +321,13 @@ def edit_token(symbol):
         return jsonify({
             "error": "api id too long"
         }), HTTP_400_BAD_REQUEST
+        
+    elif Token.query.filter_by(api_id=new_api_id,
+                            user_id=current_user,
+                            status=1).first():
+        return jsonify({
+            "error": "contract already exists"
+        }), HTTP_409_CONFLICT
         
     else:
         token.api_id = new_api_id.lower()
