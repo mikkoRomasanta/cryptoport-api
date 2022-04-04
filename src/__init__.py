@@ -4,6 +4,7 @@ from src.auth import auth
 import src.constants
 from src.token import token
 from src.database import db
+from src.token_price import token_price
 from flask_jwt_extended import JWTManager
 import datetime
 from dotenv import load_dotenv
@@ -29,6 +30,7 @@ def create_app():
     
     app.register_blueprint(auth)
     app.register_blueprint(token)
+    app.register_blueprint(token_price)
         
     return app
 

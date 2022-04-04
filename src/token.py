@@ -9,7 +9,7 @@ token = Blueprint("token",__name__,url_prefix="/api/v1/token")
 @token.route("/",methods=['POST','GET'])
 @jwt_required()
 def handle_token():
-    '''POST a new token or GET all token from user.'''
+    '''POST a new token or GET token from user.'''
     current_user = get_jwt_identity()
     
     if request.method == 'POST':
@@ -82,7 +82,7 @@ def handle_token():
         # API ID validation
         if type(api_id) is not str:
             return jsonify({
-                "error": "invalid API type"
+                "error": "invalid API id"
             }), HTTP_400_BAD_REQUEST
               
         elif len(api_type) > 30:
@@ -95,7 +95,7 @@ def handle_token():
                                    status=1,
                                    ).first():
             return jsonify({
-                "error": "contract already exists"
+                "error": "id already exists"
         }), HTTP_409_CONFLICT
     
         #Validation End

@@ -1,8 +1,10 @@
+from audioop import cross
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from src.constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_409_CONFLICT
 from src.database import User, db
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity
+from flask_cors import cross_origin
 
 
 auth = Blueprint("auth",__name__,url_prefix="/api/v1/auth")
@@ -40,6 +42,7 @@ def register():
 
 
 @auth.post('/login')
+@cross_origin()
 def login():
     '''Login...'''
     username = request.json.get('username','')
